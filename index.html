@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoda Atay | Security Researcher</title>
+  <meta name="description" content="Cybersecurity blog covering Digital Forensics, SOC Operations, Write Ups, and Security Research by Hoda Atya Ahmed.">
+  <meta name="author" content="Hoda Atya Ahmed">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --background: #f8fafc;
+      --foreground: #0f172a;
+      --card: #f1f5f9;
+      --card-foreground: #0f172a;
+      --primary: #22d3ee;
+      --primary-foreground: #0f172a;
+      --secondary: #e2e8f0;
+      --secondary-foreground: #1e293b;
+      --muted: #e2e8f0;
+      --muted-foreground: #64748b;
+      --border: #cbd5e1;
+      --radius: 0.5rem;
+    }
+    
+    .dark {
+      --background: #0c1222;
+      --foreground: #f1f5f9;
+      --card: #1a2332;
+      --card-foreground: #f1f5f9;
+      --primary: #22d3ee;
+      --primary-foreground: #0c1222;
+      --secondary: #2a3444;
+      --secondary-foreground: #e2e8f0;
+      --muted: #2a3444;
+      --muted-foreground: #94a3b8;
+      --border: #334155;
+    }
+    
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--background);
+      color: var(--foreground);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+    
+    /* Header Styles */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      background-color: var(--background);
+      transition: all 0.3s ease;
+    }
+    .header.scrolled {
+      background-color: rgba(12, 18, 34, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      display: flex;
+      height: 4rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    
+    /* Logo */
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .logo-icon-wrapper {
+      position: relative;
+    }
+    .logo-glow {
+      position: absolute;
+      inset: 0;
+      background: rgba(34, 211, 238, 0.2);
+      filter: blur(12px);
+      border-radius: 50%;
+    }
+    .logo-icon {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    .logo-icon svg { width: 1.25rem; height: 1.25rem; color: var(--primary); }
+    .logo-text { display: none; }
+    @media (min-width: 640px) { .logo-text { display: block; } }
+    .logo-name { font-weight: 700; font-size: 1.125rem; color: var(--foreground); }
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.125rem 0.375rem;
+      font-size: 0.625rem;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(34, 211, 238, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 0.25rem;
+    }
+    .logo-badge svg { width: 0.625rem; height: 0.625rem; }
+    
+    /* Navigation */
+    .nav-desktop { display: none; }
+    @media (min-width: 1024px) {
+      .nav-desktop { display: flex; align-items: center; gap: 0.25rem; }
+    }
+    .nav-link {
+      position: relative;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--foreground); }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0.75rem;
+      right: 0.75rem;
+      height: 1px;
+      background: var(--primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s;
+    }
+    .nav-link:hover::after { transform: scaleX(1); }
+    
+    /* Right Section */
+    .header-right { display: flex; align-items: center; gap: 0.5rem; }
+    
+    /* Search */
+    .search-desktop { display: none; }
+    @media (min-width: 768px) { .search-desktop { display: flex; align-items: center; } }
+    .search-wrapper { position: relative; }
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1rem;
+      height: 1rem;
+      color: var(--muted-foreground);
+      pointer-events: none;
+    }
+    .search-input {
+      width: 12rem;
+      padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+      font-size: 0.875rem;
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--foreground);
+      transition: width 0.2s;
+    }
+    .search-input:focus { outline: none; width: 16rem; border-color: var(--primary); }
+    .search-input::placeholder { color: var(--muted-foreground); }
+    
+    /* Buttons */
+    .btn-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius);
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: color 0.2s, background-color 0.2s;
+    }
+    .btn-icon:hover { color: var(--foreground); background: var(--secondary); }
+    .btn-icon svg { width: 1.25rem; height: 1.25rem; }
+    .btn-mobile-search { display: flex; }
+    @media (min-width: 768px) { .btn-mobile-search { display: none; } }
+    .btn-mobile-menu { display: flex; }
+    @media (min-width: 1024px) { .btn-mobile-menu { display: none; } }
+    
+    /* Security Badge */
+    .security-badge {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.75rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+    }
+    @media (min-width: 640px) { .security-badge { display: flex; } }
+    .pulse-dot {
+      position: relative;
+      width: 0.5rem;
+      height: 0.5rem;
+    }
+    .pulse-dot::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #34d399;
+      border-radius: 50%;
+      animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    .pulse-dot::after {
+      content: '';
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #10b981;
+      border-radius: 50%;
+    }
+    @keyframes ping {
+      75%, 100% { transform: scale(2); opacity: 0; }
+    }
+    .badge-text { font-size: 0.75rem; font-weight: 500; color: var(--muted-foreground); }
+    
+    /* Mobile Search */
+    .mobile-search {
+      display: none;
+      padding: 0.75rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .mobile-search.active { display: block; }
+    @media (min-width: 768px) { .mobile-search { display: none !important; } }
+    .mobile-search .search-input { width: 100%; }
+    
+    /* Mobile Menu */
+    .mobile-nav {
+      display: none;
+      padding: 1rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .mobile-nav.active { display: block; }
+    @media (min-width: 1024px) { .mobile-nav { display: none !important; } }
+    .mobile-nav-list { display: flex; flex-direction: column; gap: 0.25rem; }
+    .mobile-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      text-decoration: none;
+      border-radius: 0.5rem;
+      transition: color 0.2s, background-color 0.2s;
+    }
+    .mobile-nav-link:hover { color: var(--foreground); background: var(--secondary); }
+    .mobile-security {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .mobile-security-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+    }
+    
+    /* About Section */
+    .about-section {
+      padding: 5rem 0;
+      background: rgba(26, 35, 50, 0.5);
+    }
+    .about-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 3rem;
+    }
+    .about-line {
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(to right, transparent, rgba(34, 211, 238, 0.5), transparent);
+    }
+    .about-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: var(--foreground);
+    }
+    .about-title svg { width: 1.5rem; height: 1.5rem; color: var(--primary); }
+    
+    .about-grid {
+      display: grid;
+      gap: 2rem;
+    }
+    @media (min-width: 1024px) {
+      .about-grid { grid-template-columns: 2fr 1fr; }
+    }
+    
+    .about-card {
+      background: rgba(12, 18, 34, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+    }
+    
+    .profile-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .profile-avatar {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 50%;
+      background: rgba(34, 211, 238, 0.2);
+      border: 2px solid var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-avatar svg { width: 2rem; height: 2rem; color: var(--primary); }
+    .profile-name { font-size: 1.25rem; font-weight: 700; color: var(--foreground); }
+    .profile-role { font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; color: var(--primary); }
+    .profile-location {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      margin-top: 0.25rem;
+    }
+    .profile-location svg { width: 0.75rem; height: 0.75rem; }
+    
+    .profile-bio {
+      color: var(--muted-foreground);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    
+    .profile-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .profile-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .profile-link:hover { color: var(--primary); }
+    .profile-link svg { width: 1rem; height: 1rem; }
+    
+    .skills-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: 1rem;
+    }
+    .skills-title span { font-family: 'JetBrains Mono', monospace; color: var(--primary); }
+    
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 640px) { .skills-grid { grid-template-columns: 1fr; } }
+    .skill-category {
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .skill-tag {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(34, 211, 238, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 0.25rem;
+    }
+    
+    .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+    
+    .achievements-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--foreground);
+      margin-bottom: 1rem;
+    }
+    .achievements-title svg { width: 1.25rem; height: 1.25rem; color: var(--primary); }
+    .achievements-list { list-style: none; }
+    .achievement-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      margin-bottom: 0.75rem;
+    }
+    .achievement-item span { color: var(--primary); margin-top: 0.125rem; }
+    
+    .focus-card {
+      background: rgba(34, 211, 238, 0.05);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+    }
+    .focus-title {
+      font-size: 0.875rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+    .focus-list {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      line-height: 2;
+    }
+
+    /* Light mode overrides */
+    html:not(.dark) .header.scrolled {
+      background-color: rgba(248, 250, 252, 0.8);
+    }
+    html:not(.dark) .about-section {
+      background: rgba(241, 245, 249, 0.5);
+    }
+    html:not(.dark) .about-card {
+      background: rgba(248, 250, 252, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header" id="header">
+    <div class="container">
+      <div class="header-inner">
+        <!-- Logo -->
+        <a href="/" class="logo-link">
+          <div class="logo-icon-wrapper">
+            <div class="logo-glow"></div>
+            <div class="logo-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+            </div>
+          </div>
+          <div class="logo-text">
+            <div class="logo-name">Hoda Atay</div>
+            <div class="logo-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+              Security Researcher
+            </div>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="nav-desktop">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/digital-forensics" class="nav-link">Digital Forensics</a>
+          <a href="/soc" class="nav-link">SOC</a>
+          <a href="/write-ups" class="nav-link">Write Ups</a>
+          <a href="/books" class="nav-link">Books</a>
+          <a href="#about" class="nav-link">About</a>
+        </nav>
+
+        <!-- Right Section -->
+        <div class="header-right">
+          <!-- Search Desktop -->
+          <div class="search-desktop">
+            <div class="search-wrapper">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="search" class="search-input" placeholder="Search posts...">
+            </div>
+          </div>
+
+          <!-- Mobile Search Toggle -->
+          <button class="btn-icon btn-mobile-search" id="searchToggle" aria-label="Toggle search">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </button>
+
+          <!-- Theme Toggle -->
+          <button class="btn-icon" id="themeToggle" aria-label="Toggle theme">
+            <svg id="sunIcon" style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+
+          <!-- Security Badge -->
+          <div class="security-badge">
+            <div class="pulse-dot"></div>
+            <span class="badge-text">Secure</span>
+          </div>
+
+          <!-- Mobile Menu Toggle -->
+          <button class="btn-icon btn-mobile-menu" id="menuToggle" aria-label="Toggle menu">
+            <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            <svg id="closeIcon" style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Search -->
+      <div class="mobile-search" id="mobileSearch">
+        <div class="search-wrapper">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="search" class="search-input" placeholder="Search posts...">
+        </div>
+      </div>
+
+      <!-- Mobile Navigation -->
+      <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-list">
+          <a href="/" class="mobile-nav-link">Home</a>
+          <a href="/digital-forensics" class="mobile-nav-link">Digital Forensics</a>
+          <a href="/soc" class="mobile-nav-link">SOC</a>
+          <a href="/write-ups" class="mobile-nav-link">Write Ups</a>
+          <a href="/books" class="mobile-nav-link">Books</a>
+          <a href="#about" class="mobile-nav-link">About</a>
+        </div>
+        <div class="mobile-security">
+          <div class="mobile-security-badge">
+            <div class="pulse-dot"></div>
+            <span class="badge-text">Connection Secure</span>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- About Section -->
+  <section class="about-section" id="about">
+    <div class="container">
+      <div style="max-width: 64rem; margin: 0 auto;">
+        <!-- Section Header -->
+        <div class="about-header">
+          <div class="about-line"></div>
+          <h2 class="about-title">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+            About Me
+          </h2>
+          <div class="about-line"></div>
+        </div>
+
+        <div class="about-grid">
+          <!-- Left Column -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Profile Card -->
+            <div class="about-card">
+              <div class="profile-header">
+                <div class="profile-avatar">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                </div>
+                <div>
+                  <h3 class="profile-name">Hoda Atya Ahmed</h3>
+                  <p class="profile-role">Security Analyst @ Digital Defense Group MEA</p>
+                  <div class="profile-location">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>Giza, Egypt</span>
+                  </div>
+                </div>
+              </div>
+
+              <p class="profile-bio">
+                Security Analyst with a strong focus on cybersecurity and Blue Team operations. Proficient in threat detection, log analysis, and incident response using SIEM tools like Elasticsearch and Kibana. Experienced in administering Linux and Windows systems, conducting malware analysis, and developing custom detection rules.
+              </p>
+              <p class="profile-bio">
+                Backed by relevant certifications and hands-on training in SOC operations and network security. Dedicated to strengthening organizational defenses through proactive threat hunting and continuous security monitoring.
+              </p>
+
+              <div class="profile-links">
+                <a href="mailto:hodaatya189@gmail.com" class="profile-link">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  <span>hodaatya189@gmail.com</span>
+                </a>
+                <a href="https://linkedin.com/in/hodaatya" target="_blank" rel="noopener noreferrer" class="profile-link">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                  <span>LinkedIn</span>
+                </a>
+                <a href="https://github.com/hodaatya" target="_blank" rel="noopener noreferrer" class="profile-link">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                  <span>GitHub</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Skills Card -->
+            <div class="about-card">
+              <h4 class="skills-title">
+                <span>$</span> Technical Skills
+              </h4>
+              <div class="skills-grid">
+                <div>
+                  <div class="skill-category">SIEM</div>
+                  <div class="skill-tags">
+                    <span class="skill-tag">Splunk</span>
+                    <span class="skill-tag">IBM QRadar</span>
+                    <span class="skill-tag">FortiSIEM</span>
+                    <span class="skill-tag">Elasticsearch</span>
+                    <span class="skill-tag">Kibana</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="skill-category">SOAR/XDR</div>
+                  <div class="skill-tags">
+                    <span class="skill-tag">FortiSOAR</span>
+                    <span class="skill-tag">n8n</span>
+                    <span class="skill-tag">Stellar Cyber</span>
+                    <span class="skill-tag">Trend Micro EDR</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="skill-category">Network</div>
+                  <div class="skill-tags">
+                    <span class="skill-tag">Wireshark</span>
+                    <span class="skill-tag">FortiAnalyzer</span>
+                    <span class="skill-tag">TCP/IP</span>
+                    <span class="skill-tag">VPN</span>
+                    <span class="skill-tag">Firewall</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="skill-category">Systems</div>
+                  <div class="skill-tags">
+                    <span class="skill-tag">Linux RedHat</span>
+                    <span class="skill-tag">Windows Hardening</span>
+                    <span class="skill-tag">Bash</span>
+                    <span class="skill-tag">Python</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="sidebar">
+            <!-- Achievements -->
+            <div class="about-card">
+              <h4 class="achievements-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                Achievements
+              </h4>
+              <ul class="achievements-list">
+                <li class="achievement-item"><span>▹</span> ICMTC CTF Finals Qualifier (2024)</li>
+                <li class="achievement-item"><span>▹</span> Best Pitching Award - Egypt IoT & AI Challenge (2024)</li>
+                <li class="achievement-item"><span>▹</span> Google HashCode - 467th Global, 11th Egypt (2022)</li>
+                <li class="achievement-item"><span>▹</span> BSc Computer Engineering - Excellent with Honors</li>
+              </ul>
+            </div>
+
+            <!-- Focus Areas -->
+            <div class="focus-card">
+              <h4 class="focus-title">// Focus Areas</h4>
+              <div class="focus-list">
+                <p>• Digital Forensics</p>
+                <p>• Threat Detection & Analysis</p>
+                <p>• Incident Response</p>
+                <p>• Detection Rule Development</p>
+                <p>• SOC Operations</p>
+                <p>• Malware Analysis</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+    const html = document.documentElement;
+    
+    // Check saved theme or default to dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'dark') {
+      html.classList.add('dark');
+      sunIcon.style.display = 'block';
+      moonIcon.style.display = 'none';
+    } else {
+      html.classList.remove('dark');
+      sunIcon.style.display = 'none';
+      moonIcon.style.display = 'block';
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      const isDark = html.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      sunIcon.style.display = isDark ? 'block' : 'none';
+      moonIcon.style.display = isDark ? 'none' : 'block';
+    });
+
+    // Mobile Menu Toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileNav = document.getElementById('mobileNav');
+    const menuIcon = document.getElementById('menuIcon');
+    const closeIcon = document.getElementById('closeIcon');
+    
+    menuToggle.addEventListener('click', () => {
+      const isOpen = mobileNav.classList.toggle('active');
+      menuIcon.style.display = isOpen ? 'none' : 'block';
+      closeIcon.style.display = isOpen ? 'block' : 'none';
+    });
+
+    // Mobile Search Toggle
+    const searchToggle = document.getElementById('searchToggle');
+    const mobileSearch = document.getElementById('mobileSearch');
+    
+    searchToggle.addEventListener('click', () => {
+      mobileSearch.classList.toggle('active');
+    });
+
+    // Header scroll effect
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 10) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // Close mobile menu when clicking nav links
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileNav.classList.remove('active');
+        menuIcon.style.display = 'block';
+        closeIcon.style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
