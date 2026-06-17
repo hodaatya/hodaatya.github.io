@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detection Engineering: A Practical Guide to the DE Life Cycle | Hoda Atay</title>
+<meta name="description" content="A structured framework for Detection Engineering — from Requirements Discovery to Deploy — based on notes from Practical Detection Engineering.">
+<meta name="author" content="Hoda Atya Ahmed">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #f1f5f9;
+  --card-foreground: #0f172a;
+  --primary: #22d3ee;
+  --primary-foreground: #0f172a;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #1e293b;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+  --border: #cbd5e1;
+  --radius: 0.5rem;
+}
+.dark {
+  --background: #0c1222;
+  --foreground: #f1f5f9;
+  --card: #1a2332;
+  --card-foreground: #f1f5f9;
+  --primary: #22d3ee;
+  --primary-foreground: #0c1222;
+  --secondary: #2a3444;
+  --secondary-foreground: #e2e8f0;
+  --muted: #2a3444;
+  --muted-foreground: #94a3b8;
+  --border: #334155;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+
+/* ── Header (identical to index.html) ── */
+.header { position: sticky; top: 0; z-index: 50; width: 100%; background-color: var(--background); transition: all 0.3s ease; }
+.header.scrolled { background-color: rgba(12,18,34,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.header-inner { display: flex; height: 4rem; align-items: center; justify-content: space-between; gap: 1rem; }
+.logo-link { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; flex-shrink: 0; }
+.logo-icon-wrapper { position: relative; }
+.logo-glow { position: absolute; inset: 0; background: rgba(34,211,238,0.2); filter: blur(12px); border-radius: 50%; }
+.logo-icon { position: relative; display: flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem; }
+.logo-icon svg { width: 1.25rem; height: 1.25rem; color: var(--primary); }
+.logo-text { display: none; }
+@media (min-width: 640px) { .logo-text { display: block; } }
+.logo-name { font-weight: 700; font-size: 1.125rem; color: var(--foreground); }
+.logo-badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.125rem 0.375rem; font-size: 0.625rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(34,211,238,0.1); color: var(--primary); border: 1px solid rgba(34,211,238,0.2); border-radius: 0.25rem; }
+.logo-badge svg { width: 0.625rem; height: 0.625rem; }
+.nav-desktop { display: none; }
+@media (min-width: 1024px) { .nav-desktop { display: flex; align-items: center; gap: 0.25rem; } }
+.nav-link { position: relative; padding: 0.5rem 0.75rem; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); text-decoration: none; transition: color 0.2s; }
+.nav-link:hover { color: var(--foreground); }
+.nav-link::after { content: ''; position: absolute; bottom: 0; left: 0.75rem; right: 0.75rem; height: 1px; background: var(--primary); transform: scaleX(0); transform-origin: left; transition: transform 0.2s; }
+.nav-link:hover::after { transform: scaleX(1); }
+.header-right { display: flex; align-items: center; gap: 0.5rem; }
+.btn-icon { display: flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; background: transparent; border: none; border-radius: var(--radius); color: var(--muted-foreground); cursor: pointer; transition: color 0.2s, background-color 0.2s; }
+.btn-icon:hover { color: var(--foreground); background: var(--secondary); }
+.btn-icon svg { width: 1.25rem; height: 1.25rem; }
+.btn-mobile-menu { display: flex; }
+@media (min-width: 1024px) { .btn-mobile-menu { display: none; } }
+.security-badge { display: none; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: 9999px; }
+@media (min-width: 640px) { .security-badge { display: flex; } }
+.pulse-dot { position: relative; width: 0.5rem; height: 0.5rem; }
+.pulse-dot::before { content: ''; position: absolute; inset: 0; background: #34d399; border-radius: 50%; animation: ping 1.5s cubic-bezier(0,0,0.2,1) infinite; }
+.pulse-dot::after { content: ''; position: relative; display: block; width: 100%; height: 100%; background: #10b981; border-radius: 50%; }
+@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+.badge-text { font-size: 0.75rem; font-weight: 500; color: var(--muted-foreground); }
+.mobile-nav { display: none; padding: 1rem 0; border-top: 1px solid var(--border); }
+.mobile-nav.active { display: block; }
+@media (min-width: 1024px) { .mobile-nav { display: none !important; } }
+.mobile-nav-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.mobile-nav-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); text-decoration: none; border-radius: 0.5rem; transition: color 0.2s, background-color 0.2s; }
+.mobile-nav-link:hover { color: var(--foreground); background: var(--secondary); }
+
+/* ── Article Layout ── */
+.article-hero {
+  padding: 4rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to bottom, rgba(34,211,238,0.03), transparent);
+}
+.article-meta { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.article-tag {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.25rem 0.625rem; font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em;
+  background: rgba(34,211,238,0.1); color: var(--primary);
+  border: 1px solid rgba(34,211,238,0.2); border-radius: 0.25rem;
+}
+.article-date { font-size: 0.875rem; color: var(--muted-foreground); font-family: 'JetBrains Mono', monospace; }
+.article-read-time { font-size: 0.875rem; color: var(--muted-foreground); }
+.article-title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 700;
+  color: var(--foreground); line-height: 1.2; margin-bottom: 1rem;
+}
+.article-title span { color: var(--primary); }
+.article-subtitle { font-size: 1.125rem; color: var(--muted-foreground); margin-bottom: 2rem; max-width: 48rem; }
+.article-author { display: flex; align-items: center; gap: 0.75rem; }
+.author-avatar {
+  width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  background: rgba(34,211,238,0.15); border: 1px solid rgba(34,211,238,0.3);
+  display: flex; align-items: center; justify-content: center;
+}
+.author-avatar svg { width: 1.25rem; height: 1.25rem; color: var(--primary); }
+.author-name { font-weight: 600; font-size: 0.875rem; color: var(--foreground); }
+.author-role { font-size: 0.75rem; color: var(--muted-foreground); font-family: 'JetBrains Mono', monospace; }
+
+/* ── Article Body ── */
+.article-layout {
+  display: grid; grid-template-columns: 1fr;
+  gap: 3rem; padding: 3rem 0 5rem;
+  max-width: 56rem; margin: 0 auto;
+}
+.article-body { min-width: 0; }
+
+/* prose */
+.prose h2 {
+  font-size: 1.5rem; font-weight: 700; color: var(--foreground);
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.prose h2 .accent { color: var(--primary); }
+.prose h3 { font-size: 1.125rem; font-weight: 600; color: var(--foreground); margin: 1.75rem 0 0.75rem; }
+.prose p { color: var(--muted-foreground); line-height: 1.8; margin-bottom: 1.25rem; }
+.prose strong { color: var(--foreground); font-weight: 600; }
+.prose em { color: var(--primary); font-style: italic; }
+.prose ul { list-style: none; margin: 1rem 0 1.25rem; padding: 0; }
+.prose ul li {
+  display: flex; align-items: flex-start; gap: 0.625rem;
+  color: var(--muted-foreground); line-height: 1.75; margin-bottom: 0.625rem;
+  padding-left: 0.25rem;
+}
+.prose ul li::before { content: '▹'; color: var(--primary); flex-shrink: 0; margin-top: 0.1rem; }
+.prose ol { list-style: none; counter-reset: step-counter; margin: 1rem 0 1.25rem; padding: 0; }
+.prose ol li {
+  counter-increment: step-counter; display: flex; align-items: flex-start; gap: 0.75rem;
+  color: var(--muted-foreground); line-height: 1.75; margin-bottom: 0.75rem;
+}
+.prose ol li::before {
+  content: counter(step-counter); flex-shrink: 0;
+  width: 1.5rem; height: 1.5rem; display: flex; align-items: center; justify-content: center;
+  background: rgba(34,211,238,0.1); color: var(--primary);
+  border: 1px solid rgba(34,211,238,0.2); border-radius: 50%;
+  font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+  margin-top: 0.15rem;
+}
+
+/* Phase boxes */
+.phase-grid { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0 2rem; }
+.phase-box {
+  display: grid; grid-template-columns: 10rem 1fr;
+  border: 1px solid var(--border); border-radius: 0.5rem; overflow: hidden;
+}
+@media (max-width: 600px) { .phase-box { grid-template-columns: 1fr; } }
+.phase-label {
+  background: rgba(34,211,238,0.08); border-right: 1px solid var(--border);
+  padding: 1rem; display: flex; flex-direction: column; justify-content: center;
+}
+.phase-num { font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; }
+.phase-name { font-size: 0.95rem; font-weight: 700; color: var(--primary); }
+.phase-io { background: rgba(12,18,34,0.5); padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.375rem; justify-content: center; }
+.phase-io p { margin: 0; font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.6; }
+.phase-io strong { color: var(--foreground); }
+
+/* Field callout boxes */
+.field-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 1rem 0 1.5rem; }
+.field-item {
+  border-left: 3px solid rgba(34,211,238,0.4); padding: 0.875rem 1rem;
+  background: rgba(34,211,238,0.03); border-radius: 0 0.375rem 0.375rem 0;
+}
+.field-item strong { color: var(--primary); font-size: 0.875rem; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 0.375rem; }
+.field-item p { margin: 0; font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.7; }
+
+/* Continuous activities */
+.activities-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 0.75rem; margin: 1rem 0 1.5rem; }
+@media (max-width: 480px) { .activities-grid { grid-template-columns: 1fr; } }
+.activity-chip {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1rem; border-radius: 0.5rem;
+  background: var(--card); border: 1px solid var(--border);
+  font-size: 0.875rem; font-weight: 500; color: var(--foreground);
+}
+.activity-chip span { color: var(--primary); font-size: 1rem; }
+
+/* Conclusion callout */
+.conclusion-callout {
+  margin-top: 2.5rem; padding: 1.5rem;
+  background: rgba(34,211,238,0.05);
+  border: 1px solid rgba(34,211,238,0.2); border-radius: 0.5rem;
+}
+.conclusion-callout p { margin-bottom: 0.75rem; }
+.conclusion-callout p:last-child { margin-bottom: 0; }
+.source-note {
+  margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+  font-size: 0.8rem; color: var(--muted-foreground); font-family: 'JetBrains Mono', monospace;
+  text-align: center;
+}
+
+/* Back link */
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  color: var(--muted-foreground); text-decoration: none; font-size: 0.875rem;
+  transition: color 0.2s; margin-bottom: 2rem;
+}
+.back-link:hover { color: var(--primary); }
+.back-link svg { width: 1rem; height: 1rem; }
+
+html:not(.dark) .header.scrolled { background-color: rgba(248,250,252,0.8); }
+html:not(.dark) .phase-io { background: rgba(248,250,252,0.5); }
+html:not(.dark) .field-item { background: rgba(34,211,238,0.04); }
+html:not(.dark) .conclusion-callout { background: rgba(34,211,238,0.04); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header" id="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="/" class="logo-link">
+        <div class="logo-icon-wrapper">
+          <div class="logo-glow"></div>
+          <div class="logo-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          </div>
+        </div>
+        <div class="logo-text">
+          <div class="logo-name">Hoda Atay</div>
+          <div class="logo-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+            Security Researcher
+          </div>
+        </div>
+      </a>
+      <nav class="nav-desktop">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/digital-forensics" class="nav-link">Digital Forensics</a>
+        <a href="/soc" class="nav-link">SOC</a>
+        <a href="/write-ups" class="nav-link">Write Ups</a>
+        <a href="/books" class="nav-link">Books</a>
+        <a href="/#about" class="nav-link">About</a>
+      </nav>
+      <div class="header-right">
+        <button class="btn-icon" id="themeToggle" aria-label="Toggle theme">
+          <svg id="sunIcon" style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
+        <div class="security-badge">
+          <div class="pulse-dot"></div>
+          <span class="badge-text">Secure</span>
+        </div>
+        <button class="btn-icon btn-mobile-menu" id="menuToggle" aria-label="Toggle menu">
+          <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          <svg id="closeIcon" style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <div class="mobile-nav-list">
+        <a href="/" class="mobile-nav-link">Home</a>
+        <a href="/digital-forensics" class="mobile-nav-link">Digital Forensics</a>
+        <a href="/soc" class="mobile-nav-link">SOC</a>
+        <a href="/write-ups" class="mobile-nav-link">Write Ups</a>
+        <a href="/books" class="mobile-nav-link">Books</a>
+        <a href="/#about" class="mobile-nav-link">About</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="article-hero">
+  <div class="container" style="max-width:56rem;">
+    <a href="/" class="back-link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Back to home
+    </a>
+    <div class="article-meta">
+      <span class="article-tag">
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+        Detection Engineering
+      </span>
+      <span class="article-tag">Book Notes</span>
+      <span class="article-date">Jun 2026</span>
+      <span class="article-read-time">· 8 min read</span>
+    </div>
+    <h1 class="article-title">Detection Engineering:<br><span>A Practical Guide to the DE Life Cycle</span></h1>
+    <p class="article-subtitle">A structured framework for building, testing, and maintaining security detections — based on notes from <em>Practical Detection Engineering</em>.</p>
+    <div class="article-author">
+      <div class="author-avatar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+      </div>
+      <div>
+        <div class="author-name">Hoda Atya Ahmed</div>
+        <div class="author-role">Security Analyst @ Digital Defense Group MEA</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Article Body -->
+<div class="container">
+  <div class="article-layout">
+    <article class="article-body prose">
+
+      <!-- INTRO -->
+      <h2><span class="accent">//</span> The Search That Led Me Here</h2>
+
+      <p>Like many practitioners, I spent a long time doing detection engineering the way many practitioners do — learning through experience, adapting to new threats, and refining my approach as I went.</p>
+
+      <p>I wasn't new to security. I understood the threats, the TTPs, and the tooling. When building detections, I would identify gaps, evaluate available signals, and create rules based on the information and context I had at the time. Sometimes I'd reference a MITRE ATT&CK technique. Other times I'd build on existing detections or insights from colleagues. The approach worked, but it was largely driven by individual experience rather than a clearly defined framework.</p>
+
+      <p>That flexibility had its advantages. It allowed me to move quickly and respond to emerging threats. But as environments grew more complex, I started noticing challenges that many detection teams face: maintaining consistency across detections, measuring coverage, prioritizing engineering efforts, and ensuring that detections remained effective over time.</p>
+
+      <p>I knew there was an opportunity to make the process more structured. I just hadn't found a framework that brought all the pieces together.</p>
+
+      <p>I read blog posts, explored open-source detection repositories, and spent plenty of time navigating ATT&CK. Each resource provided valuable insights — a better query here, a useful data source there — but I was still looking for a cohesive methodology that connected detection development, validation, maintenance, and continuous improvement.</p>
+
+      <p>Then I picked up <em>Practical Detection Engineering</em>, and things started clicking.</p>
+
+      <p>What stood out wasn't that it introduced completely new concepts. Rather, it organized many of the ideas and practices I had encountered into a comprehensive engineering lifecycle. The book treats detection engineering much like software engineering treats product development — with clear phases, defined inputs and outputs, feedback loops, and continuous improvement. It shifted my perspective from building individual detections to building a <strong>repeatable system</strong> for producing and maintaining effective detections over time.</p>
+
+      <p>Below are my notes from the core framework. If you're a detection engineer looking to bring more structure and consistency to your work, this is what the framework looks like.</p>
+
+      <!-- LIFECYCLE -->
+      <h2><span class="accent">//</span> The DE Life Cycle</h2>
+
+      <p>The Detection Engineering life cycle consists of six sequential phases, supported by four continuous activities that run in parallel throughout the entire program.</p>
+
+      <div class="phase-grid">
+        <div class="phase-box">
+          <div class="phase-label"><div class="phase-num">Phase 1</div><div class="phase-name">Requirements Discovery</div></div>
+          <div class="phase-io"><p><strong>Input:</strong> Findings from detection requirement sources</p><p><strong>Output:</strong> Structured detection requirements</p></div>
+        </div>
+        <div class="phase-box">
+          <div class="phase-label"><div class="phase-num">Phase 2</div><div class="phase-name">Triage</div></div>
+          <div class="phase-io"><p><strong>Input:</strong> Detection requirement from Phase 1</p><p><strong>Output:</strong> Triaged and prioritized detection requirement</p></div>
+        </div>
+        <div class="phase-box">
+          <div class="phase-label"><div class="phase-num">Phase 3</div><div class="phase-name">Investigate</div></div>
+          <div class="phase-io"><p><strong>Input:</strong> Triaged detection requirement</p><p><strong>Output:</strong> Technical specifications and data engineering requirements</p></div>
+        </div>
+        <div class="phase-box">
+          <div class="phase-label"><div class="phase-num">Phase 4</div><div class="phase-name">Develop</div></div>
+          <div class="phase-io"><p><strong>Input:</strong> Technical specifications from Investigate</p><p><strong>Output:</strong> Detection code</p></div>
+        </div>
+        <div class="phase-box">
+          <div class="phase-label"><div class="phase-num">Phase 5</div><div class="phase-name">Test</div></div>
+          <div class="phase-io"><p><strong>Input:</strong> Detection code from Develop</p><p><strong>Output:</strong> Validated, production-ready detection</p></div>
+        </div>
+        <div class="phase-box">
+          <div class="phase-label"><div class="phase-num">Phase 6</div><div class="phase-name">Deploy</div></div>
+          <div class="phase-io"><p><strong>Input:</strong> Validated detection</p><p><strong>Output:</strong> Live detection running in production</p></div>
+        </div>
+      </div>
+
+      <p>Alongside these phases, four continuous activities keep the program healthy over time:</p>
+      <div class="activities-grid">
+        <div class="activity-chip"><span>◈</span> Monitoring</div>
+        <div class="activity-chip"><span>◈</span> Maintenance</div>
+        <div class="activity-chip"><span>◈</span> Metrics</div>
+        <div class="activity-chip"><span>◈</span> Comprehensive validation</div>
+      </div>
+      <p>These aren't phases you complete and move on from. They're ongoing disciplines that keep your detection content aligned with a shifting threat landscape and a growing attack surface.</p>
+
+      <!-- PHASE 1 -->
+      <h2><span class="accent">01</span> Requirements Discovery</h2>
+      <p>Every detection starts as a requirement. This phase collects those requirements from multiple sources — threat intelligence feeds, forensic investigations, SOC tickets, red team findings, industry TTPs — and structures them so the next phase can evaluate them meaningfully.</p>
+      <p>A complete detection requirement should capture six key fields:</p>
+
+      <div class="field-list">
+        <div class="field-item"><strong>Requesting organization</strong><p>Who raised this requirement, including the specific individual if possible. Closing the loop by notifying them once a detection is built builds trust and encourages better future submissions.</p></div>
+        <div class="field-item"><strong>Description</strong><p>What exactly needs to be detected? This can range from highly technical ("detect when new files are written to a web server code directory") to business-level ("notify the security team if an end user runs unauthorized remote administration software"). Both are valid — the detection engineer will translate them later.</p></div>
+        <div class="field-item"><strong>Reason</strong><p>Why does this detection matter now? Was it triggered by a forensic investigation of an actual attack? A blog post about an emerging technique? Or TTPs observed against companies in your sector? The reason helps prioritize during triage.</p></div>
+        <div class="field-item"><strong>Exceptions</strong><p>Under what conditions should an alert not fire? For example, an authorized developer modifying a sensitive directory shouldn't trigger an alert. Exceptions defined upfront reduce false positives before the detection is even written.</p></div>
+        <div class="field-item"><strong>Scope</strong><p>Where should the detection apply? The scope constrains the detection, informs the engineer about available telemetry, and can surface limitations early.</p></div>
+        <div class="field-item"><strong>Evidence</strong><p>Malware samples, logs, PCAPs, or any other data that can be used to build or validate the detection. Requirements coming from the SOC, IR teams, or threat hunters should include artifacts collected during their investigation.</p></div>
+      </div>
+
+      <!-- PHASE 2 -->
+      <h2><span class="accent">02</span> Triage</h2>
+      <p>As your requirements backlog grows, you need a principled way to decide what to build next. A simple first-in-first-out queue won't cut it — it ignores the changing threat landscape and your organization's evolving attack surface.</p>
+      <p>Triage decisions should factor in:</p>
+      <ul>
+        <li><strong>Severity</strong> — How damaging could this threat be if it materializes?</li>
+        <li><strong>Organizational alignment</strong> — Is this threat actively targeting your industry, technology stack, or geography?</li>
+        <li><strong>Detection coverage</strong> — Do you already have partial coverage? Would this fill a critical gap?</li>
+        <li><strong>Active exploits</strong> — Is this being exploited in the wild right now?</li>
+      </ul>
+      <p>Most requirements are independent, so the DE team can freely pick the highest-priority item from the backlog on each cycle. The goal is a dynamic, threat-informed queue — not a mechanical FIFO list.</p>
+
+      <!-- PHASE 3 -->
+      <h2><span class="accent">03</span> Investigate</h2>
+      <p>The Investigate phase converts a high-level detection requirement into a precise technical specification. This is where gaps get surfaced: if the data you need isn't being collected, you discover that here — before wasting development time.</p>
+      <p>This phase breaks down into four steps:</p>
+      <ol>
+        <li><strong>Identify the data source</strong> — Which logs, telemetry, or event streams will feed this detection?</li>
+        <li><strong>Determine detection indicator types</strong> — Are you looking for a process name, a network connection pattern, a file hash, a sequence of events?</li>
+        <li><strong>Research</strong> — Dig into how the technique actually works. Understand normal vs. abnormal behavior in your environment.</li>
+        <li><strong>Establish validation criteria</strong> — How will you know the detection is working correctly? Define your success conditions before you write a single line of code.</li>
+      </ol>
+
+      <!-- PHASE 4 -->
+      <h2><span class="accent">04</span> Develop</h2>
+      <p>With a technical specification in hand, this phase designs, builds, and unit-tests the detection implementation. Detections are commonly implemented as queries run against one or more data sources, and depending on your environment, data pipelines or intermediary stores may need to be built to make the right telemetry available.</p>
+      <p>The development process has three sub-processes:</p>
+      <ul>
+        <li><strong>Design</strong> — Architect the detection logic based on the technical specification.</li>
+        <li><strong>Development</strong> — Implement the detection query or rule in the appropriate language or platform.</li>
+        <li><strong>Unit testing</strong> — Validate the implementation against both known-bad and known-good samples in isolation.</li>
+      </ul>
+      <p>A critical principle here is keeping both short-term and long-term objectives in mind. A quick-and-dirty detection that works today can become a maintenance burden tomorrow if it wasn't designed with the broader detection ecosystem in mind.</p>
+
+      <!-- PHASE 5 -->
+      <h2><span class="accent">05</span> Test</h2>
+      <p>Testing validates that your detection actually works and isn't excessively noisy before it reaches production. Critically, testing isn't a gate at the end of development — it's a continuous activity that should guide development from the very beginning.</p>
+
+      <h3>Known bad</h3>
+      <p>Telemetry that represents actual adversary activity. This can come from sandbox simulations of the attack, real incident data, or mock data crafted to represent expected attacker behavior.</p>
+
+      <h3>Known good</h3>
+      <p>Telemetry captured from normal, benign activity in a clean environment. Ideally sourced from your production environment so the tests are representative of real-world conditions — not just a clean-room simulation.</p>
+
+      <p>Ad hoc tests written during this phase should target three goals:</p>
+      <ul>
+        <li><strong>False positive identification</strong> — What legitimate activity could trigger this detection incorrectly? Minimizing the false positive rate is a primary testing objective.</li>
+        <li><strong>Evasion potential</strong> — What variations of the technique could bypass the detection? While red teams own adversarial testing, detection engineers should identify the obvious bypasses before deployment.</li>
+        <li><strong>Completeness gaps</strong> — Is the detection too narrowly defined? Are there permutations of the event it would miss entirely?</li>
+      </ul>
+
+      <!-- CONCLUSION -->
+      <h2><span class="accent">//</span> Why This Framework Changed How I Work</h2>
+
+      <div class="conclusion-callout">
+        <p>What makes the DE life cycle powerful isn't any single phase — it's the feedback loop. Requirements inform triage, investigation surfaces data gaps, testing drives development back, and the four continuous activities keep the entire program honest over time.</p>
+        <p>Before I had this structure, I was producing individual detections. Now I'm building a detection program. <strong>The difference is everything.</strong></p>
+        <p>If you've been approaching detection engineering the same way I used to — by instinct, by habit, by urgency — I'd strongly recommend picking up <em>Practical Detection Engineering</em>. What's summarized here is just the framework. The book goes much deeper into each phase, with practical guidance on tooling, metrics, and how to scale this inside a real team.</p>
+      </div>
+
+      <div class="source-note">// Based on notes from Practical Detection Engineering</div>
+
+    </article>
+  </div>
+</div>
+
+<script>
+const themeToggle = document.getElementById('themeToggle');
+const sunIcon = document.getElementById('sunIcon');
+const moonIcon = document.getElementById('moonIcon');
+const html = document.documentElement;
+const savedTheme = localStorage.getItem('theme') || 'dark';
+if (savedTheme === 'dark') { html.classList.add('dark'); sunIcon.style.display = 'block'; moonIcon.style.display = 'none'; }
+else { html.classList.remove('dark'); sunIcon.style.display = 'none'; moonIcon.style.display = 'block'; }
+themeToggle.addEventListener('click', () => {
+  html.classList.toggle('dark');
+  const isDark = html.classList.contains('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  sunIcon.style.display = isDark ? 'block' : 'none';
+  moonIcon.style.display = isDark ? 'none' : 'block';
+});
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const menuIcon = document.getElementById('menuIcon');
+const closeIcon = document.getElementById('closeIcon');
+menuToggle.addEventListener('click', () => {
+  const isOpen = mobileNav.classList.toggle('active');
+  menuIcon.style.display = isOpen ? 'none' : 'block';
+  closeIcon.style.display = isOpen ? 'block' : 'none';
+});
+const header = document.getElementById('header');
+window.addEventListener('scroll', () => { header.classList.toggle('scrolled', window.scrollY > 10); });
+</script>
+</body>
+</html>
