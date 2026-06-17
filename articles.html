@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Articles | Hoda Atay</title>
+<meta name="description" content="Technical writing on detection engineering, threat hunting, digital forensics, and security operations.">
+<meta name="author" content="Hoda Atya Ahmed">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #f1f5f9;
+  --card-foreground: #0f172a;
+  --primary: #22d3ee;
+  --primary-foreground: #0f172a;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #1e293b;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+  --border: #cbd5e1;
+  --radius: 0.5rem;
+}
+.dark {
+  --background: #0c1222;
+  --foreground: #f1f5f9;
+  --card: #1a2332;
+  --card-foreground: #f1f5f9;
+  --primary: #22d3ee;
+  --primary-foreground: #0c1222;
+  --secondary: #2a3444;
+  --secondary-foreground: #e2e8f0;
+  --muted: #2a3444;
+  --muted-foreground: #94a3b8;
+  --border: #334155;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+
+/* ── Header ── */
+.header { position: sticky; top: 0; z-index: 50; width: 100%; background-color: var(--background); transition: all 0.3s ease; }
+.header.scrolled { background-color: rgba(12,18,34,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.header-inner { display: flex; height: 4rem; align-items: center; justify-content: space-between; gap: 1rem; }
+.logo-link { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; flex-shrink: 0; }
+.logo-icon-wrapper { position: relative; }
+.logo-glow { position: absolute; inset: 0; background: rgba(34,211,238,0.2); filter: blur(12px); border-radius: 50%; }
+.logo-icon { position: relative; display: flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem; }
+.logo-icon svg { width: 1.25rem; height: 1.25rem; color: var(--primary); }
+.logo-text { display: none; }
+@media (min-width: 640px) { .logo-text { display: block; } }
+.logo-name { font-weight: 700; font-size: 1.125rem; color: var(--foreground); }
+.logo-badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.125rem 0.375rem; font-size: 0.625rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(34,211,238,0.1); color: var(--primary); border: 1px solid rgba(34,211,238,0.2); border-radius: 0.25rem; }
+.logo-badge svg { width: 0.625rem; height: 0.625rem; }
+.nav-desktop { display: none; }
+@media (min-width: 1024px) { .nav-desktop { display: flex; align-items: center; gap: 0.25rem; } }
+.nav-link { position: relative; padding: 0.5rem 0.75rem; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); text-decoration: none; transition: color 0.2s; }
+.nav-link:hover, .nav-link.active { color: var(--foreground); }
+.nav-link::after { content: ''; position: absolute; bottom: 0; left: 0.75rem; right: 0.75rem; height: 1px; background: var(--primary); transform: scaleX(0); transform-origin: left; transition: transform 0.2s; }
+.nav-link:hover::after, .nav-link.active::after { transform: scaleX(1); }
+.header-right { display: flex; align-items: center; gap: 0.5rem; }
+.btn-icon { display: flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; background: transparent; border: none; border-radius: var(--radius); color: var(--muted-foreground); cursor: pointer; transition: color 0.2s, background-color 0.2s; }
+.btn-icon:hover { color: var(--foreground); background: var(--secondary); }
+.btn-icon svg { width: 1.25rem; height: 1.25rem; }
+.btn-mobile-menu { display: flex; }
+@media (min-width: 1024px) { .btn-mobile-menu { display: none; } }
+.security-badge { display: none; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: 9999px; }
+@media (min-width: 640px) { .security-badge { display: flex; } }
+.pulse-dot { position: relative; width: 0.5rem; height: 0.5rem; }
+.pulse-dot::before { content: ''; position: absolute; inset: 0; background: #34d399; border-radius: 50%; animation: ping 1.5s cubic-bezier(0,0,0.2,1) infinite; }
+.pulse-dot::after { content: ''; position: relative; display: block; width: 100%; height: 100%; background: #10b981; border-radius: 50%; }
+@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+.badge-text { font-size: 0.75rem; font-weight: 500; color: var(--muted-foreground); }
+.mobile-nav { display: none; padding: 1rem 0; border-top: 1px solid var(--border); }
+.mobile-nav.active { display: block; }
+@media (min-width: 1024px) { .mobile-nav { display: none !important; } }
+.mobile-nav-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.mobile-nav-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); text-decoration: none; border-radius: 0.5rem; transition: color 0.2s, background-color 0.2s; }
+.mobile-nav-link:hover { color: var(--foreground); background: var(--secondary); }
+
+/* ── Page Hero ── */
+.page-hero {
+  padding: 4rem 0 3rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to bottom, rgba(34,211,238,0.03), transparent);
+}
+.page-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--primary); margin-bottom: 1rem;
+}
+.page-eyebrow::before { content: '//'; opacity: 0.5; }
+.page-title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 700; line-height: 1.15;
+  color: var(--foreground); margin-bottom: 1rem;
+}
+.page-title span { color: var(--primary); }
+.page-subtitle { font-size: 1.0625rem; color: var(--muted-foreground); max-width: 42rem; line-height: 1.7; }
+.page-stats {
+  display: flex; align-items: center; gap: 1.5rem;
+  margin-top: 2rem; flex-wrap: wrap;
+}
+.stat {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.8125rem; color: var(--muted-foreground);
+  font-family: 'JetBrains Mono', monospace;
+}
+.stat-value { color: var(--primary); font-weight: 600; }
+
+/* ── Layout ── */
+.articles-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4rem;
+  padding: 3.5rem 0 5rem;
+}
+@media (min-width: 1024px) {
+  .articles-layout {
+    grid-template-columns: 14rem 1fr;
+    gap: 3rem;
+  }
+}
+
+/* ── Sidebar ── */
+.sidebar { position: relative; }
+.sidebar-inner {
+  position: sticky; top: 5.5rem;
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.sidebar-label {
+  font-size: 0.6875rem; font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted-foreground); padding: 0 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.sidebar-btn {
+  display: flex; align-items: center; gap: 0.625rem;
+  padding: 0.5rem 0.75rem; border-radius: 0.375rem;
+  font-size: 0.875rem; font-weight: 500;
+  color: var(--muted-foreground);
+  background: transparent; border: none; cursor: pointer;
+  text-align: left; transition: color 0.15s, background-color 0.15s;
+  width: 100%;
+}
+.sidebar-btn:hover { color: var(--foreground); background: var(--secondary); }
+.sidebar-btn.active { color: var(--primary); background: rgba(34,211,238,0.08); }
+.sidebar-btn .count {
+  margin-left: auto; font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted-foreground);
+  background: var(--secondary); border-radius: 9999px;
+  padding: 0.1rem 0.5rem;
+}
+.sidebar-btn.active .count { background: rgba(34,211,238,0.15); color: var(--primary); }
+.sidebar-divider { height: 1px; background: var(--border); margin: 0.75rem 0; }
+
+/* ── Main ── */
+.main-content { min-width: 0; }
+
+/* Category Section */
+.category-section { margin-bottom: 3.5rem; }
+.category-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.5rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.category-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 2.25rem; height: 2.25rem;
+  background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2);
+  border-radius: 0.5rem; color: var(--primary); flex-shrink: 0;
+}
+.category-icon svg { width: 1rem; height: 1rem; }
+.category-name {
+  font-size: 1.125rem; font-weight: 700; color: var(--foreground);
+}
+.category-count {
+  font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;
+  color: var(--muted-foreground); margin-left: auto;
+}
+
+/* Article Cards */
+.article-list { display: flex; flex-direction: column; gap: 1px; }
+
+.article-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  overflow: hidden;
+  text-decoration: none;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  margin-bottom: 1rem;
+}
+.article-card:hover {
+  border-color: rgba(34,211,238,0.4);
+  box-shadow: 0 0 0 1px rgba(34,211,238,0.1), 0 8px 24px rgba(0,0,0,0.2);
+  transform: translateY(-2px);
+}
+@media (min-width: 640px) {
+  .article-card { grid-template-columns: 1fr auto; }
+}
+
+.article-card-body { padding: 1.5rem; }
+.article-card-tags {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 0.875rem; flex-wrap: wrap;
+}
+.tag {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.1875rem 0.5rem; font-size: 0.6875rem;
+  font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em;
+  border-radius: 0.25rem;
+}
+.tag-primary {
+  background: rgba(34,211,238,0.1); color: var(--primary);
+  border: 1px solid rgba(34,211,238,0.2);
+}
+.tag-secondary {
+  background: var(--secondary); color: var(--muted-foreground);
+  border: 1px solid var(--border);
+}
+.tag svg { width: 0.625rem; height: 0.625rem; }
+
+.article-card-title {
+  font-size: 1.125rem; font-weight: 700;
+  color: var(--card-foreground); line-height: 1.35;
+  margin-bottom: 0.625rem;
+  transition: color 0.2s;
+}
+.article-card:hover .article-card-title { color: var(--primary); }
+.article-card-excerpt {
+  font-size: 0.875rem; color: var(--muted-foreground);
+  line-height: 1.7; margin-bottom: 1.25rem;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.article-card-footer {
+  display: flex; align-items: center; gap: 1rem;
+  font-size: 0.8125rem; color: var(--muted-foreground);
+  font-family: 'JetBrains Mono', monospace; flex-wrap: wrap;
+}
+.article-card-footer span { display: flex; align-items: center; gap: 0.375rem; }
+.article-card-footer svg { width: 0.875rem; height: 0.875rem; }
+
+.article-card-arrow {
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem 1.25rem;
+  color: var(--muted-foreground);
+  border-left: 1px solid var(--border);
+  transition: color 0.2s, background-color 0.2s;
+}
+@media (max-width: 639px) {
+  .article-card-arrow { display: none; }
+}
+.article-card:hover .article-card-arrow { color: var(--primary); background: rgba(34,211,238,0.05); }
+.article-card-arrow svg { width: 1.125rem; height: 1.125rem; }
+
+/* Featured badge */
+.featured-badge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.125rem 0.5rem; font-size: 0.625rem;
+  font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em;
+  background: rgba(251,191,36,0.1); color: #fbbf24;
+  border: 1px solid rgba(251,191,36,0.2); border-radius: 0.25rem;
+}
+
+/* Empty state */
+.empty-category {
+  text-align: center; padding: 3rem 1rem;
+  border: 1px dashed var(--border); border-radius: 0.625rem;
+  color: var(--muted-foreground); font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* Coming soon card */
+.coming-soon-card {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--card); border: 1px dashed var(--border);
+  border-radius: 0.625rem; margin-bottom: 1rem;
+  opacity: 0.6;
+}
+.coming-soon-card span { font-size: 0.875rem; color: var(--muted-foreground); font-style: italic; }
+
+html:not(.dark) .header.scrolled { background-color: rgba(248,250,252,0.8); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header" id="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="/" class="logo-link">
+        <div class="logo-icon-wrapper">
+          <div class="logo-glow"></div>
+          <div class="logo-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          </div>
+        </div>
+        <div class="logo-text">
+          <div class="logo-name">Hoda Atay</div>
+          <div class="logo-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+            Security Researcher
+          </div>
+        </div>
+      </a>
+      <nav class="nav-desktop">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/articles" class="nav-link active">Articles</a>
+        <a href="/digital-forensics" class="nav-link">Digital Forensics</a>
+        <a href="/soc" class="nav-link">SOC</a>
+        <a href="/write-ups" class="nav-link">Write Ups</a>
+        <a href="/books" class="nav-link">Books</a>
+        <a href="/#about" class="nav-link">About</a>
+      </nav>
+      <div class="header-right">
+        <button class="btn-icon" id="themeToggle" aria-label="Toggle theme">
+          <svg id="sunIcon" style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
+        <div class="security-badge">
+          <div class="pulse-dot"></div>
+          <span class="badge-text">Secure</span>
+        </div>
+        <button class="btn-icon btn-mobile-menu" id="menuToggle" aria-label="Toggle menu">
+          <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+          <svg id="closeIcon" style="display:none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <div class="mobile-nav-list">
+        <a href="/" class="mobile-nav-link">Home</a>
+        <a href="/articles" class="mobile-nav-link">Articles</a>
+        <a href="/digital-forensics" class="mobile-nav-link">Digital Forensics</a>
+        <a href="/soc" class="mobile-nav-link">SOC</a>
+        <a href="/write-ups" class="mobile-nav-link">Write Ups</a>
+        <a href="/books" class="mobile-nav-link">Books</a>
+        <a href="/#about" class="mobile-nav-link">About</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-eyebrow">Articles</div>
+    <h1 class="page-title">Technical <span>Writing</span></h1>
+    <p class="page-subtitle">Deep dives into detection engineering, threat hunting, digital forensics, and security operations — grounded in real practice and structured thinking.</p>
+    <div class="page-stats">
+      <div class="stat">
+        <span class="stat-value">1</span>
+        <span>article published</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">1</span>
+        <span>category</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value font-mono">Jun 2026</span>
+        <span>latest</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main Layout -->
+<div class="container">
+  <div class="articles-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-inner">
+        <div class="sidebar-label">Categories</div>
+        <button class="sidebar-btn active" onclick="filterCategory('all')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          All Articles
+          <span class="count">1</span>
+        </button>
+        <div class="sidebar-divider"></div>
+        <button class="sidebar-btn" onclick="filterCategory('threat-detection')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          Threat Detection
+          <span class="count">1</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Articles Main -->
+    <main class="main-content" id="main-content">
+
+      <!-- Threat Detection Category -->
+      <section class="category-section" id="cat-threat-detection">
+        <div class="category-header">
+          <div class="category-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          </div>
+          <div>
+            <div class="category-name">Threat Detection</div>
+          </div>
+          <span class="category-count font-mono">01 article</span>
+        </div>
+
+        <div class="article-list">
+
+          <!-- Article: Detection Engineering -->
+          <a href="/detection-engineering" class="article-card">
+            <div class="article-card-body">
+              <div class="article-card-tags">
+                <span class="tag tag-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                  Threat Detection
+                </span>
+                <span class="tag tag-secondary">Book Notes</span>
+                <span class="featured-badge">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  Latest
+                </span>
+              </div>
+              <div class="article-card-title">Detection Engineering: A Practical Guide to the DE Life Cycle</div>
+              <p class="article-card-excerpt">A structured framework for building, testing, and maintaining security detections — from Requirements Discovery through to Deploy, supported by four continuous activities that keep your detection program honest over time. Based on notes from <em>Practical Detection Engineering</em>.</p>
+              <div class="article-card-footer">
+                <span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                  Jun 2026
+                </span>
+                <span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  8 min read
+                </span>
+                <span>Hoda Atya Ahmed</span>
+              </div>
+            </div>
+            <div class="article-card-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </a>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const sunIcon = document.getElementById('sunIcon');
+const moonIcon = document.getElementById('moonIcon');
+const html = document.documentElement;
+const savedTheme = localStorage.getItem('theme') || 'dark';
+if (savedTheme === 'dark') { html.classList.add('dark'); sunIcon.style.display = 'block'; moonIcon.style.display = 'none'; }
+else { html.classList.remove('dark'); sunIcon.style.display = 'none'; moonIcon.style.display = 'block'; }
+themeToggle.addEventListener('click', () => {
+  html.classList.toggle('dark');
+  const isDark = html.classList.contains('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  sunIcon.style.display = isDark ? 'block' : 'none';
+  moonIcon.style.display = isDark ? 'none' : 'block';
+});
+
+// Mobile menu
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const menuIcon = document.getElementById('menuIcon');
+const closeIcon = document.getElementById('closeIcon');
+menuToggle.addEventListener('click', () => {
+  const isOpen = mobileNav.classList.toggle('active');
+  menuIcon.style.display = isOpen ? 'none' : 'block';
+  closeIcon.style.display = isOpen ? 'block' : 'none';
+});
+
+// Sticky header
+const header = document.getElementById('header');
+window.addEventListener('scroll', () => { header.classList.toggle('scrolled', window.scrollY > 10); });
+
+// Category filter
+function filterCategory(cat) {
+  const btns = document.querySelectorAll('.sidebar-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  const sections = document.querySelectorAll('.category-section');
+  sections.forEach(s => {
+    if (cat === 'all' || s.id === 'cat-' + cat) {
+      s.style.display = '';
+    } else {
+      s.style.display = 'none';
+    }
+  });
+}
+</script>
+</body>
+</html>
